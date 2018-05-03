@@ -1,67 +1,102 @@
 package pl.tsm.put.poznan.livescrap;
 
+import com.machinepublishers.jbrowserdriver.JBrowserDriver;
+import com.machinepublishers.jbrowserdriver.Settings;
+import com.machinepublishers.jbrowserdriver.UserAgent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class WebScraper {
 
     public static void main(String args[]) throws Exception {
-        FirefoxOptions options = new FirefoxOptions();
-        WebDriver driver = new FirefoxDriver(options);
-        List<WebElement> headers;
+        WebDriver driver = new JBrowserDriver(Settings.builder().headless(false).userAgent(UserAgent.CHROME).build());
+        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        List<WebElement> headers = new ArrayList<>();
+        List<WebElement> scores = new ArrayList<>();
+        
+        driver.get("http://www.livescore.com");
+        
+        Runnable r = () -> {
+            getData(driver, headers, scores);
+        };
+        
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(r, 0, 1, TimeUnit.MINUTES);
+
+        System.out.println("\nPress ENTER to terminate...");
+        System.in.read();
+        System.out.println("Waiting for termination...");
+        
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
+        
+        driver.quit();
+        System.out.println("Bye!\n");
+    }
+
+    private static void getData(WebDriver driver, List<WebElement> headers, List<WebElement> scores) {
         try {
-            driver.get("http://www.livescore.com");
+            System.out.println("\n" + LocalDateTime.now() + " | START\n");
+            
             headers = driver.findElements(By.xpath("//div[@data-type='container']/div[contains(@class, 'row-tall')]"));
-            List<WebElement> scores = driver.findElements(By.xpath("//div[@data-type='container']/div[contains(@class, 'row-gray')]"));
-            System.out.println();
-
-            try {
-                String url = "jdbc:mysql://80.211.242.134:3306/livescrap";
-                String sql = "TRUNCATE TABLE headers";
-                String sql1 = "TRUNCATE TABLE scores";
-                String query = "INSERT INTO headers VALUES ";
-                String query1 = "INSERT INTO scores VALUES ";
-                String param = "";
-                String param1 = "";
-                try (Connection conn = DriverManager.getConnection(url, "mysql", "Cvbn4569")) {
-                    Statement st = conn.createStatement();
-                    for (WebElement e : headers) {
-                        String id = e.getAttribute("data-stg-id");
-                        List<WebElement> elements = e.findElements(By.xpath(".//div[@class='clear']/div[@class='left']/a"));
-                        param = param + "(" + id + ", '" + elements.get(0).getText().replace("'", "''") + "', '" +
-                                elements.get(1).getText().replace("'", "''") + "'),";
+            scores = driver.findElements(By.xpath("//div[@data-type='container']/div[contains(@class, 'row-gray')]"));
+            
+            String url = "jdbc:mysql://localhost/livescrap";
+            String truncateHeaders = "TRUNCATE TABLE headers";
+            String truncateScores = "TRUNCATE TABLE scores";
+            String queryHeaders = "INSERT INTO headers VALUES ";
+            String queryScores = "INSERT INTO scores VALUES ";
+            String params = "";
+            try (Connection conn = DriverManager.getConnection(url, "mysql", "")) {
+                Statement st = conn.createStatement();
+                for (WebElement e : headers) {
+                    String id = e.getAttribute("data-stg-id");
+                    List<WebElement> elements = e.findElements(By.xpath(".//div[@class='clear']/div[@class='left']/a"));
+                    if (elements.size() > 0) {
+                        params = params + "(" + id + ", '" + elements.get(0).getText().replace("'", "''") + "', '"
+                                + elements.get(1).getText().replace("'", "''") + "'),";
                     }
-                    for (WebElement e : scores) {
-                        String id = e.getAttribute("data-stg-id");
-                        List<WebElement> elements = e.findElements(By.xpath(".//div"));
-                        param1 = param1 + "(" + id + ", '" + elements.get(0).getText().replace("'", "''") + "', '" +
-                                elements.get(1).getText().replace("'", "''") + "', '" + elements.get(3).getText().replace("'", "''") +
-                                "', '" + elements.get(2).getText() + "'),";
-                    }
-                    param = param.substring(0, param.length() - 1);
-                    query = query + param;
-                    param1 = param1.substring(0, param1.length() - 1);
-                    query1 = query1 + param1;
-                    st.executeUpdate(sql);
-                    st.executeUpdate(query);
-                    st.executeUpdate(sql1);
-                    st.executeUpdate(query1);
                 }
-            } catch (SQLException e) {
-                System.err.println("Got an exception! ");
-                System.err.println(e.getMessage());
+                
+                params = params.substring(0, params.length() - 1);
+                queryHeaders = queryHeaders + params;
+                st.executeUpdate(truncateHeaders);
+                st.executeUpdate(queryHeaders);
+                
+                params = "";
+                
+                for (WebElement e : scores) {
+                    String id = e.getAttribute("data-stg-id");
+                    List<WebElement> elements = e.findElements(By.xpath(".//div"));
+                    params = params + "(" + id + ", '" + elements.get(0).getText().replace("'", "''") + "', '"
+                            + elements.get(1).getText().replace("'", "''") + "', '" + elements.get(3).getText().replace("'", "''")
+                            + "', '" + elements.get(2).getText() + "'),";
+                }
+                
+                params = params.substring(0, params.length() - 1);
+                queryScores = queryScores + params;
+                st.executeUpdate(truncateScores);
+                st.executeUpdate(queryScores);
+                
+                driver.navigate().refresh();
+                
+                System.out.println("\n" + LocalDateTime.now() + " | END\n");
             }
-
-        } finally {
-            driver.quit();
+        } catch (SQLException e) {
+            Logger.getLogger(WebScraper.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 }

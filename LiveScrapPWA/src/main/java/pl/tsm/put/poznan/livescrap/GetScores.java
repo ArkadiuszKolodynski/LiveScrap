@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
@@ -33,10 +36,24 @@ public class GetScores extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        Map<String, String> countries = new HashMap<>();
+        for (String iso : Locale.getISOCountries()) {
+            Locale l = new Locale("", iso);
+            countries.put(l.getDisplayCountry(Locale.ENGLISH), iso);
+        }
+        countries.put("England", "gb");
+        countries.put("Republic of Korea", "kr");
+        countries.put("FYR Macedonia", "mk");
+        countries.put("Northern Ireland", "gb");
+        countries.put("Scotland", "gb");
+        countries.put("Wales", "gb");
+        countries.put("USA", "us");
+
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery(SQL_QUERY)) {
             while (resultSet.next()) {
-                headersList.add(new Header(resultSet.getInt("id"), resultSet.getString("country"), resultSet.getString("league")));
+//                System.out.println(countries.get(resultSet.getString("country")) + " - " + resultSet.getString("country"));
+                headersList.add(new Header(resultSet.getInt("id"), countries.get(resultSet.getString("country")), resultSet.getString("country"), resultSet.getString("league")));
             }
             connection.close();
         } catch (SQLException ex) {
@@ -51,7 +68,7 @@ public class GetScores extends HttpServlet {
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     scores.add(new Score(resultSet.getInt("id"), resultSet.getString("minn"), resultSet.getString("team1"), resultSet.getString("team2"),
-                    resultSet.getString("sco")));
+                            resultSet.getString("sco")));
                 }
                 connection.close();
                 request.setAttribute(e.getIdAsString(), scores);
