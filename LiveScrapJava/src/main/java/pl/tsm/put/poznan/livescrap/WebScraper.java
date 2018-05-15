@@ -22,7 +22,7 @@ import org.openqa.selenium.WebElement;
 public class WebScraper {
 
     public static void main(String args[]) throws Exception {
-        WebDriver driver = new JBrowserDriver(Settings.builder().headless(false).userAgent(UserAgent.CHROME).build());
+        WebDriver driver = new JBrowserDriver(Settings.builder().userAgent(UserAgent.CHROME).build());
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         List<WebElement> headers = new ArrayList<>();
         List<WebElement> scores = new ArrayList<>();
