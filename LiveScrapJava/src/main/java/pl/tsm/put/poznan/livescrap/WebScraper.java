@@ -33,7 +33,7 @@ public class WebScraper {
             getData(driver, headers, scores);
         };
         
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(r, 0, 1, TimeUnit.MINUTES);
 
         System.out.println("\nPress ENTER to terminate...");
