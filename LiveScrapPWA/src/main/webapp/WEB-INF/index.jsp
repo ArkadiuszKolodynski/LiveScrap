@@ -6,11 +6,20 @@
         <link rel="stylesheet" href="css/styles.css">
         <link rel="stylesheet" href="css/flag-icon.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pontano+Sans&amp;subset=latin-ext">  
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jockey+One"> 
         <title>LiveScrap</title>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({
+                google_ad_client: "ca-pub-3577408109063843",
+                enable_page_level_ads: true
+            });
+        </script>
     </head>
     <body><jsp:useBean id="now" class="java.util.Date" /><fmt:formatDate var="date" value="${now}" pattern="dd.MM.yy" />
         <nav>
             <a class="navbrand" href="index">
+                <img src="images/ball.svg" class="logo" alt=""/>
                 <strong>LiveScrap</strong>
             </a>
         </nav>
@@ -27,7 +36,7 @@
                         <strong>${h.getLeagueName()}</strong>
                     </span>
                     <span class="date">${date}</span>
-                </div><c:out value="${id448}"/><c:set var="scores" value='${requestScope[h.getIdAsString()]}'/>
+                </div><c:set var="scores" value='${requestScope[h.getIdAsString()]}'/>
                 <div class="results"><c:forEach var="s" items="${scores}">
                     <div class="result">
                         <span class="minute">${s.getMin()}</span>

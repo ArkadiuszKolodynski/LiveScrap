@@ -52,7 +52,6 @@ public class GetScores extends HttpServlet {
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery(SQL_QUERY)) {
             while (resultSet.next()) {
-//                System.out.println(countries.get(resultSet.getString("country")) + " - " + resultSet.getString("country"));
                 headersList.add(new Header(resultSet.getInt("id"), countries.get(resultSet.getString("country")), resultSet.getString("country"), resultSet.getString("league")));
             }
             connection.close();

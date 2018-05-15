@@ -18,9 +18,8 @@ body {
 }
 
 nav {
-    background-color: #009933;
-    box-shadow: 0 1px 5px #00CC33;
-    font-size: 1.5em;
+    background-color: #00897b;
+    box-shadow: 0 1px 5px #00897b;
     padding: 10px 30px;
 }
 
@@ -67,6 +66,14 @@ footer {
     width: 35%;
 }
 
+.logo {
+    filter: invert(100%);
+    max-width: 40px;
+    margin-bottom: 0.1em;
+    width: 5vw;
+    vertical-align: middle;
+}
+
 .minute {
     display: inline-block;
     width: 10%;
@@ -74,7 +81,10 @@ footer {
 
 .navbrand {
     color: #fff;
+    font-family: 'Jockey One', cursive;
+    font-size: 2.5em;
     text-decoration: none;
+    text-transform: uppercase;
 }
 
 .result {
