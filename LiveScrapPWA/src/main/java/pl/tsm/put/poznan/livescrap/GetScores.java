@@ -86,6 +86,7 @@ public class GetScores extends HttpServlet {
             }
         }
 
+        response.setContentType("text/html;charset=UTF-8");
         request.getRequestDispatcher("/WEB-INF/index.jsp").include(request, response);
         headersList.clear();
         SQL_QUERY = "";
