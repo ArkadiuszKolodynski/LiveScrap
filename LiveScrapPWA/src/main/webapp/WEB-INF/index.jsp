@@ -55,4 +55,4 @@
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" defer></script>
         <script src="js/script.js" defer></script>
     </body>
-</html
+</html>
