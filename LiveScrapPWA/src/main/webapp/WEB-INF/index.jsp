@@ -3,28 +3,29 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="theme-color" content="#00897b">
+        <meta name="description" content="Agregator wyników meczów piłkarskich">
+        <link rel="manifest" href="manifest.json">
         <link rel="stylesheet" href="css/styles.css">
         <link rel="stylesheet" href="css/flag-icon.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pontano+Sans&amp;subset=latin-ext">  
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jockey+One"> 
         <title>LiveScrap</title>
-        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({
-                google_ad_client: "ca-pub-3577408109063843",
-                enable_page_level_ads: true
-            });
-        </script>
     </head>
-    <body><jsp:useBean id="now" class="java.util.Date" /><fmt:formatDate var="date" value="${now}" pattern="dd.MM.yy" />
+    <body><jsp:useBean id="now" class="java.util.Date" /><c:choose><c:when test="${param.id == '0'}"><jsp:setProperty name="now" property="time" value="${now.time - 86400000}"/></c:when><c:when test="${param.id=='2'}"><jsp:setProperty name="now" property="time" value="${now.time + 86400000}"/></c:when></c:choose><fmt:formatDate var="date" value="${now}" pattern="dd.MM.yy" />
         <nav>
             <a class="navbrand" href="index">
                 <img src="images/ball.svg" class="logo" alt=""/>
                 <strong>LiveScrap</strong>
             </a>
         </nav>
-        <div class="container">
-        <c:forEach var="h" items="${list}">
+        <div id="days">
+            <a href="?id=0"<c:if test = "${param.id == '0'}"> class="active"</c:if>>Wczoraj</a> | 
+            <a href="?id=1"<c:if test = "${param.id == null || param.id == '1'}"> class="active"</c:if>>Dzisiaj</a> | 
+            <a href="?id=2"<c:if test = "${param.id == '2'}"> class="active"</c:if>>Jutro</a>
+        </div>
+        <div id="container">    
+            <c:forEach var="h" items="${list}">
             <div class="block">
                 <div class="header">
                     <span class="flag-icon flag-icon-${h.getCountryCode()}"></span>
@@ -46,10 +47,12 @@
                     </div></c:forEach>
                 </div>
             </div>
-        </c:forEach>
+            </c:forEach>
         </div>
         <footer><fmt:formatDate var="year" value="${now}" pattern="yyyy" />
-            ⓒ ${year}
+            ${year}
         </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" defer></script>
+        <script src="js/script.js" defer></script>
     </body>
-</html>
+</html

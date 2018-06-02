@@ -23,18 +23,28 @@ public class GetScores extends HttpServlet {
 
     @Resource(name = "jdbc/MariaDB")
     private DataSource dataSource;
-    private final String SQL_QUERY;
-    private final String SQL_QUERY_SCORES;
+    private String SQL_QUERY;
+    private String SQL_QUERY_SCORES;
     private final ArrayList<Header> headersList;
 
     public GetScores() {
-        this.SQL_QUERY = "SELECT * FROM headers ORDER BY country";
-        this.SQL_QUERY_SCORES = "SELECT * FROM scores WHERE id = ?";
         this.headersList = new ArrayList<>();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        SQL_QUERY = "SELECT * FROM headers WHERE time = & ORDER BY country";
+        SQL_QUERY_SCORES = "SELECT * FROM scores WHERE id = ? AND time = &";
+        
+        String i = request.getParameter("id");
+        if (i != null) {
+            SQL_QUERY = SQL_QUERY.replace("&", i);
+            SQL_QUERY_SCORES = SQL_QUERY_SCORES.replace("&", i);
+        } else {
+            SQL_QUERY = SQL_QUERY.replace("&", "1");
+            SQL_QUERY_SCORES = SQL_QUERY_SCORES.replace("&", "1");
+        }
 
         Map<String, String> countries = new HashMap<>();
         for (String iso : Locale.getISOCountries()) {
@@ -76,8 +86,10 @@ public class GetScores extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/index.jsp").include(request, response);
         headersList.clear();
+        SQL_QUERY = "";
+        SQL_QUERY_SCORES = "";
     }
 
     @Override
